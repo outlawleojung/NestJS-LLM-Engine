@@ -17,6 +17,8 @@ import { buildCopyPrompt, buildQaPrompt } from '../prompts';
 import { LlmProviderFactory } from '../providers/llm-provider.factory';
 import { VoyageProvider } from '../providers/voyage.provider';
 
+// 큐 잡을 소비해 실제 LLM 호출을 수행하는 워커.
+// 실패하면 BullMQ가 지수 백오프로 최대 3회 재시도 → 그래도 실패 시 onFailed에서 FAILED로 마감.
 @Processor(AI_REQUEST_QUEUE)
 export class AiRequestProcessor extends WorkerHost {
   private readonly logger = new Logger(AiRequestProcessor.name);
@@ -49,6 +51,7 @@ export class AiRequestProcessor extends WorkerHost {
     );
 
     try {
+      // 세션 조회는 매 attempt마다 새로 — 재시도 사이에 만료되면 자연스럽게 실패로 이어짐.
       const keys = await this.sessionService.get(sessionId);
       if (request.type === AiRequestType.COPY_GENERATION) {
         await this.processCopyGeneration(request, keys);
@@ -71,6 +74,8 @@ export class AiRequestProcessor extends WorkerHost {
     }
   }
 
+  // BullMQ는 재시도 예정인 실패에 대해서도 'failed' 이벤트를 쏘므로
+  // attempts 소진된 최종 실패만 걸러 FAILED로 마감한다.
   @OnWorkerEvent('failed')
   async onFailed(job: Job<AiRequestJobData>): Promise<void> {
     if (job.attemptsMade < (job.opts.attempts ?? 1)) {
@@ -98,6 +103,8 @@ export class AiRequestProcessor extends WorkerHost {
 
   private async processQa(request: AiRequest, keys: UserKeys): Promise<void> {
     const input = request.input as { question: string; topK: number };
+    // RAG 3단계 중 Retrieval — 질문을 임베딩해 pgvector로 유사 상품을 뽑는다.
+    // input_type='query'는 Voyage의 asymmetric embedding 힌트 (문서와 질의를 다르게 임베딩).
     const questionEmbedding = await this.voyageProvider.embedOne(
       keys.voyageApiKey,
       input.question,

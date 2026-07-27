@@ -9,10 +9,8 @@ export interface RequestWithKeys extends Request {
   sessionId?: string;
 }
 
-/**
- * 쿠키에서 세션 ID를 읽어 Redis에서 사용자 키를 조회한 뒤 요청 객체에 부착.
- * 세션이 없거나 만료되었으면 401.
- */
+// 쿠키의 sessionId로 세션을 조회해 request에 userKeys를 부착.
+// 이후 컨트롤러는 @SessionKeys()/@SessionId() 데코레이터로 꺼낸다.
 @Injectable()
 export class SessionGuard implements CanActivate {
   constructor(private readonly sessionService: SessionService) {}

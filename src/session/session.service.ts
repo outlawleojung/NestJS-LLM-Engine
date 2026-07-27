@@ -29,6 +29,8 @@ export class SessionService {
     return sessionId;
   }
 
+  // 조회할 때마다 TTL을 다시 늘려주는 sliding expiration.
+  // 활발히 사용 중인 세션은 자동 연장되고, 방치된 세션만 만료된다.
   async get(sessionId: string): Promise<UserKeys> {
     const encrypted = await this.redis.get(this.key(sessionId));
     if (!encrypted) {

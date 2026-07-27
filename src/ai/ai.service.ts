@@ -43,6 +43,7 @@ export class AiService {
     return request;
   }
 
+  // FAILED 요청은 토큰이 실제로 소모되지 않았을 가능성이 있어 (또는 부분 소모) COMPLETED만 집계.
   async getUsage(query: UsageQueryDto) {
     const start = query.startDate ?? new Date(0);
     const end = query.endDate ?? new Date();
@@ -70,6 +71,9 @@ export class AiService {
     };
   }
 
+  // 요청을 DB에 PENDING으로 남기고 큐에 던진 뒤 requestId를 바로 반환한다.
+  // 실제 LLM 호출은 워커가 담당하므로 컨트롤러는 짧게 끝난다.
+  // 잡 페이로드에 원본 키가 아닌 sessionId만 넣는 이유: Redis 잡 스토리지에 평문 키가 남는 것을 피하기 위해.
   private async enqueue(
     sessionId: string,
     type: AiRequestType,

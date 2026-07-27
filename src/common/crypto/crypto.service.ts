@@ -18,12 +18,13 @@ export class CryptoService {
     this.key = createHash('sha256').update(secret).digest();
   }
 
+  // 저장 포맷: base64(iv || auth_tag || ciphertext)
+  // iv/tag를 함께 저장하는 이유는 복호화 시 이 정보가 있어야 하고, 키만 서버 시크릿으로 격리하면 되기 때문.
   encrypt(plaintext: string): string {
     const iv = randomBytes(CryptoService.IV_LENGTH);
     const cipher = createCipheriv('aes-256-gcm', this.key, iv);
     const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
     const tag = cipher.getAuthTag();
-    // iv || tag || ciphertext (base64)
     return Buffer.concat([iv, tag, encrypted]).toString('base64');
   }
 

@@ -20,6 +20,7 @@ export class GeminiProvider implements LlmProvider {
   }
 
   async complete(apiKey: string, params: LlmCompletionParams): Promise<LlmCompletionResult> {
+    // Gemini는 system 프롬프트가 generationConfig가 아니라 모델 인스턴스 옵션으로 들어감.
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: this.modelName,

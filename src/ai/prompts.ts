@@ -19,6 +19,8 @@ export function buildCopyPrompt(product: Product): { system: string; prompt: str
   };
 }
 
+// RAG의 Augmented — 검색된 상품 정보를 [검색된 상품] 섹션으로 프롬프트에 삽입.
+// 시스템 프롬프트에서 "이 컨텍스트만 근거로" 답하도록 제약해 hallucination을 억제.
 export function buildQaPrompt(question: string, products: Product[]): { system: string; prompt: string } {
   const context = products
     .map(

@@ -22,6 +22,7 @@ const PRICING_TABLE: Record<string, ModelPricing> = {
   'gemini-2.5-pro': { input: 0, output: 0 },
 };
 
+// 단가표에 없는 모델은 Haiku 4.5 수준으로 가정 — 실제 비용보다 과대 추정될 수 있으니 알림용 지표로만.
 const FALLBACK_PRICING: ModelPricing = { input: 1.0, output: 5.0 };
 
 export function estimateCost(model: string, inputTokens: number, outputTokens: number): number {

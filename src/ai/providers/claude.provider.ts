@@ -20,6 +20,7 @@ export class ClaudeProvider implements LlmProvider {
   }
 
   async complete(apiKey: string, params: LlmCompletionParams): Promise<LlmCompletionResult> {
+    // BYOK — 요청마다 사용자 키로 클라이언트를 새로 만든다. SDK가 가벼워 큰 부담 없음.
     const client = new Anthropic({ apiKey });
     const response = await client.messages.create({
       model: this.model,
@@ -28,6 +29,7 @@ export class ClaudeProvider implements LlmProvider {
       messages: [{ role: 'user', content: params.prompt }],
     });
 
+    // Claude 응답은 여러 block(tool_use 등)이 섞일 수 있으니 text만 골라 이어붙인다.
     const text = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')
       .map((block) => block.text)

@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+// Anthropic이 임베딩 API를 제공하지 않아 Voyage를 별도로 사용.
+// 공식 SDK가 안정 릴리스 전이라 REST 직접 호출로 붙임.
 @Injectable()
 export class VoyageProvider {
   private readonly logger = new Logger(VoyageProvider.name);
@@ -37,6 +39,7 @@ export class VoyageProvider {
       throw new Error(`Voyage embed failed: ${response.status}`);
     }
 
+    // Voyage 응답의 순서가 요청 순서와 다를 수 있어 index로 정렬 후 반환.
     const json = (await response.json()) as {
       data: { embedding: number[]; index: number }[];
     };
