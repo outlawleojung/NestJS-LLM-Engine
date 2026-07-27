@@ -8,6 +8,7 @@ import { validateEnv } from './common/config/env.validation';
 import { CryptoModule } from './common/crypto/crypto.module';
 import { RedisModule } from './common/redis/redis.module';
 import { ProductsModule } from './products/products.module';
+import { SeedModule } from './seed/seed.module';
 import { SessionModule } from './session/session.module';
 import { ViewsModule } from './views/views.module';
 
@@ -42,6 +43,7 @@ import { ViewsModule } from './views/views.module';
     SessionModule,
     ProductsModule,
     AiModule,
+    SeedModule,
     ViewsModule,
   ],
 })
