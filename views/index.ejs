@@ -146,10 +146,18 @@
     </p>
     <% if (!hasSession) { %>
       <form id="key-form">
-        <label>Anthropic API Key</label>
-        <input type="password" name="anthropicApiKey" placeholder="sk-ant-..." autocomplete="off" required />
-        <label>Voyage API Key</label>
+        <label>AI 제공자</label>
+        <select name="provider" id="provider-select">
+          <option value="gemini" selected>Google Gemini (무료, 하루 1,500회) — 발급: aistudio.google.com/apikey</option>
+          <option value="claude">Anthropic Claude (유료, 크레딧 필요) — 발급: console.anthropic.com</option>
+        </select>
+
+        <label id="llm-key-label">Google Gemini API Key</label>
+        <input type="password" name="llmApiKey" id="llm-key-input" placeholder="AIza..." autocomplete="off" required />
+
+        <label>Voyage API Key (임베딩용, 무료) — 발급: dash.voyageai.com</label>
         <input type="password" name="voyageApiKey" placeholder="pa-..." autocomplete="off" required />
+
         <button type="submit" class="primary">세션 시작</button>
       </form>
     <% } else { %>
@@ -254,6 +262,20 @@
     // --- STEP 1: 키 세션 ---
     const keyForm = el('key-form');
     if (keyForm) {
+      const providerInfo = {
+        claude: { label: 'Anthropic Claude API Key', placeholder: 'sk-ant-...' },
+        gemini: { label: 'Google Gemini API Key', placeholder: 'AIza...' },
+      };
+      const providerSelect = el('provider-select');
+      const llmKeyLabel = el('llm-key-label');
+      const llmKeyInput = el('llm-key-input');
+      providerSelect.addEventListener('change', () => {
+        const cfg = providerInfo[providerSelect.value];
+        llmKeyLabel.textContent = cfg.label;
+        llmKeyInput.placeholder = cfg.placeholder;
+        llmKeyInput.value = '';
+      });
+
       keyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
@@ -261,7 +283,8 @@
           await callJson('/session', {
             method: 'POST',
             body: JSON.stringify({
-              anthropicApiKey: fd.get('anthropicApiKey'),
+              provider: fd.get('provider'),
+              llmApiKey: fd.get('llmApiKey'),
               voyageApiKey: fd.get('voyageApiKey'),
             }),
           });
