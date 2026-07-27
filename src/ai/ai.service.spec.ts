@@ -38,8 +38,8 @@ describe('AiService', () => {
   });
 
   describe('enqueueCopy', () => {
-    it('PENDING 상태로 AiRequest를 저장하고 큐에 작업을 추가한 뒤 requestId를 반환한다', async () => {
-      const result = await service.enqueueCopy({ productId: 'p-1' });
+    it('PENDING 상태로 저장하고 큐 잡에 sessionId를 담아 추가한다', async () => {
+      const result = await service.enqueueCopy('sess-1', { productId: 'p-1' });
 
       expect(result.requestId).toBeDefined();
       expect(repository.save).toHaveBeenCalledWith(
@@ -47,26 +47,30 @@ describe('AiService', () => {
           type: AiRequestType.COPY_GENERATION,
           status: AiRequestStatus.PENDING,
           input: { productId: 'p-1' },
-          requestId: result.requestId,
         }),
       );
       expect(queue.add).toHaveBeenCalledWith(
         AiRequestType.COPY_GENERATION,
-        { requestId: result.requestId },
+        { requestId: result.requestId, sessionId: 'sess-1' },
         expect.objectContaining({ attempts: 3 }),
       );
     });
   });
 
   describe('enqueueQa', () => {
-    it('question과 topK(기본값 5)를 input에 담아 저장한다', async () => {
-      await service.enqueueQa({ question: '노캔 헤드폰 추천' });
+    it('question과 topK(기본 5)를 담고 sessionId를 잡에 전달한다', async () => {
+      const result = await service.enqueueQa('sess-2', { question: '노캔 헤드폰 추천' });
 
       expect(repository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           type: AiRequestType.QA,
           input: { question: '노캔 헤드폰 추천', topK: 5 },
         }),
+      );
+      expect(queue.add).toHaveBeenCalledWith(
+        AiRequestType.QA,
+        { requestId: result.requestId, sessionId: 'sess-2' },
+        expect.any(Object),
       );
     });
   });

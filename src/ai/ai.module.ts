@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ProductsModule } from '../products/products.module';
+import { SessionModule } from '../session/session.module';
 import { AiController } from './ai.controller';
 import { AI_REQUEST_QUEUE } from './ai.queue';
 import { AiService } from './ai.service';
@@ -16,6 +17,7 @@ import { AiProvidersModule } from './providers/providers.module';
     BullModule.registerQueue({ name: AI_REQUEST_QUEUE }),
     AiProvidersModule,
     ProductsModule,
+    SessionModule,
   ],
   controllers: [AiController],
   providers: [AiService, AiRequestProcessor],

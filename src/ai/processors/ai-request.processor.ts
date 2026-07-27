@@ -5,6 +5,7 @@ import { Job } from 'bullmq';
 import { Repository } from 'typeorm';
 
 import { ProductsService } from '../../products/products.service';
+import { SessionService, UserKeys } from '../../session/session.service';
 import { AI_REQUEST_QUEUE, AiRequestJobData } from '../ai.queue';
 import { estimateCost } from '../cost/pricing';
 import {
@@ -26,12 +27,13 @@ export class AiRequestProcessor extends WorkerHost {
     private readonly productsService: ProductsService,
     private readonly claudeProvider: ClaudeProvider,
     private readonly voyageProvider: VoyageProvider,
+    private readonly sessionService: SessionService,
   ) {
     super();
   }
 
   async process(job: Job<AiRequestJobData>): Promise<void> {
-    const { requestId } = job.data;
+    const { requestId, sessionId } = job.data;
     const request = await this.aiRequestRepository.findOne({ where: { requestId } });
     if (!request) {
       this.logger.warn(`AiRequest not found for job: ${requestId}`);
@@ -47,10 +49,11 @@ export class AiRequestProcessor extends WorkerHost {
     );
 
     try {
+      const keys = await this.sessionService.get(sessionId);
       if (request.type === AiRequestType.COPY_GENERATION) {
-        await this.processCopyGeneration(request);
+        await this.processCopyGeneration(request, keys);
       } else if (request.type === AiRequestType.QA) {
-        await this.processQa(request);
+        await this.processQa(request, keys);
       } else {
         throw new Error(`Unknown AI request type: ${request.type}`);
       }
@@ -71,7 +74,7 @@ export class AiRequestProcessor extends WorkerHost {
   @OnWorkerEvent('failed')
   async onFailed(job: Job<AiRequestJobData>): Promise<void> {
     if (job.attemptsMade < (job.opts.attempts ?? 1)) {
-      return; // will retry
+      return;
     }
     await this.aiRequestRepository.update(
       { requestId: job.data.requestId },
@@ -79,22 +82,34 @@ export class AiRequestProcessor extends WorkerHost {
     );
   }
 
-  private async processCopyGeneration(request: AiRequest): Promise<void> {
+  private async processCopyGeneration(request: AiRequest, keys: UserKeys): Promise<void> {
     const productId = (request.input as { productId: string }).productId;
     const product = await this.productsService.findOne(productId);
     const { system, prompt } = buildCopyPrompt(product);
 
-    const result = await this.claudeProvider.complete({ system, prompt, maxTokens: 1024 });
+    const result = await this.claudeProvider.complete(keys.anthropicApiKey, {
+      system,
+      prompt,
+      maxTokens: 1024,
+    });
     await this.finalize(request, result.text, result.inputTokens, result.outputTokens, result.model);
   }
 
-  private async processQa(request: AiRequest): Promise<void> {
+  private async processQa(request: AiRequest, keys: UserKeys): Promise<void> {
     const input = request.input as { question: string; topK: number };
-    const questionEmbedding = await this.voyageProvider.embedOne(input.question, 'query');
+    const questionEmbedding = await this.voyageProvider.embedOne(
+      keys.voyageApiKey,
+      input.question,
+      'query',
+    );
     const products = await this.productsService.searchSimilar(questionEmbedding, input.topK);
 
     const { system, prompt } = buildQaPrompt(input.question, products);
-    const result = await this.claudeProvider.complete({ system, prompt, maxTokens: 1024 });
+    const result = await this.claudeProvider.complete(keys.anthropicApiKey, {
+      system,
+      prompt,
+      maxTokens: 1024,
+    });
     await this.finalize(request, result.text, result.inputTokens, result.outputTokens, result.model);
   }
 

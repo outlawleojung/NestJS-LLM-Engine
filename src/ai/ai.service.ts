@@ -24,12 +24,12 @@ export class AiService {
     private readonly aiRequestQueue: Queue,
   ) {}
 
-  async enqueueCopy(dto: CreateCopyDto): Promise<{ requestId: string }> {
-    return this.enqueue(AiRequestType.COPY_GENERATION, { productId: dto.productId });
+  async enqueueCopy(sessionId: string, dto: CreateCopyDto): Promise<{ requestId: string }> {
+    return this.enqueue(sessionId, AiRequestType.COPY_GENERATION, { productId: dto.productId });
   }
 
-  async enqueueQa(dto: CreateQaDto): Promise<{ requestId: string }> {
-    return this.enqueue(AiRequestType.QA, {
+  async enqueueQa(sessionId: string, dto: CreateQaDto): Promise<{ requestId: string }> {
+    return this.enqueue(sessionId, AiRequestType.QA, {
       question: dto.question,
       topK: dto.topK ?? 5,
     });
@@ -71,6 +71,7 @@ export class AiService {
   }
 
   private async enqueue(
+    sessionId: string,
     type: AiRequestType,
     input: Record<string, unknown>,
   ): Promise<{ requestId: string }> {
@@ -85,7 +86,7 @@ export class AiService {
     );
     await this.aiRequestQueue.add(
       type,
-      { requestId },
+      { requestId, sessionId },
       {
         attempts: 3,
         backoff: { type: 'exponential', delay: 1000 },

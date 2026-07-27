@@ -1,13 +1,14 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AiModule } from './ai/ai.module';
 import { validateEnv } from './common/config/env.validation';
-import { ApiKeyGuard } from './common/guards/api-key.guard';
+import { CryptoModule } from './common/crypto/crypto.module';
+import { RedisModule } from './common/redis/redis.module';
 import { ProductsModule } from './products/products.module';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
@@ -35,14 +36,11 @@ import { ProductsModule } from './products/products.module';
         },
       }),
     }),
+    CryptoModule,
+    RedisModule,
+    SessionModule,
     ProductsModule,
     AiModule,
-  ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ApiKeyGuard,
-    },
   ],
 })
 export class AppModule {}

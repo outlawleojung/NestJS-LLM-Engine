@@ -39,16 +39,20 @@ describe('ProductsService', () => {
   });
 
   describe('create', () => {
-    it('임베딩을 생성한 뒤 상품을 저장한다', async () => {
+    it('사용자 Voyage 키로 임베딩을 생성한 뒤 상품을 저장한다', async () => {
       voyage.embedOne.mockResolvedValueOnce([0.1, 0.2, 0.3]);
 
-      const result = await service.create({
+      const result = await service.create('pa-user-key', {
         name: '헤드폰',
         category: '오디오',
         features: '노캔',
       });
 
-      expect(voyage.embedOne).toHaveBeenCalledWith(expect.stringContaining('헤드폰'), 'document');
+      expect(voyage.embedOne).toHaveBeenCalledWith(
+        'pa-user-key',
+        expect.stringContaining('헤드폰'),
+        'document',
+      );
       expect(repository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           name: '헤드폰',

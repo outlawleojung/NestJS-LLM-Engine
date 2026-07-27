@@ -14,8 +14,9 @@ export class ProductsService {
     private readonly voyageProvider: VoyageProvider,
   ) {}
 
-  async create(dto: CreateProductDto): Promise<Product> {
+  async create(voyageApiKey: string, dto: CreateProductDto): Promise<Product> {
     const embedding = await this.voyageProvider.embedOne(
+      voyageApiKey,
       this.buildEmbeddingText(dto.name, dto.category, dto.features),
       'document',
     );
@@ -41,9 +42,6 @@ export class ProductsService {
     return product;
   }
 
-  /**
-   * 질문 임베딩과 유사한 상품을 코사인 거리 기준 top-K 조회.
-   */
   async searchSimilar(queryEmbedding: number[], limit = 5): Promise<Product[]> {
     const vectorLiteral = `[${queryEmbedding.join(',')}]`;
     return this.productRepository
