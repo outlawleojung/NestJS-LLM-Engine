@@ -70,5 +70,6 @@
 ## 환경 준비 필요
 
 - Node.js 20+
+- **pnpm** (`npm install -g pnpm`)
 - Docker (PostgreSQL + Redis)
 - 사용자 본인의 Anthropic / Voyage 키 (실행 후 웹 UI에서 입력)

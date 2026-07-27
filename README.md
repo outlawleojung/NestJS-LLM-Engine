@@ -56,7 +56,7 @@ Claude API로 상품 상세페이지 카피를 생성하고, pgvector + Voyage �
 git clone git@github.com:outlawleojung/NestJS-LLM-Engine.git
 cd NestJS-LLM-Engine
 
-npm install
+pnpm install
 
 # .env 만들기 (API 키는 여기에 넣지 않는다)
 cp .env.example .env
@@ -64,8 +64,8 @@ cp .env.example .env
 # 예: openssl rand -hex 32
 
 docker compose up -d
-npm run migration:run
-npm run start:dev
+pnpm migration:run
+pnpm start:dev
 ```
 
 ### 3. 사용
@@ -158,8 +158,16 @@ views/
 ## 테스트
 
 ```bash
-npm test              # 단위 테스트
-npm run test:cov      # 커버리지
+pnpm test              # 단위 테스트
+pnpm test:cov          # 커버리지
+```
+
+## 패키지 매니저
+
+이 프로젝트는 **pnpm**을 사용합니다. `pnpm-lock.yaml`을 커밋해서 버전을 고정합니다.
+
+```bash
+npm install -g pnpm      # 설치 안 되어 있으면
 ```
 
 ## 진행 상황
