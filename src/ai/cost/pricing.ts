@@ -1,16 +1,22 @@
-/**
- * Claude 모델별 단가 (USD, 1M 토큰 기준).
- * 공식 pricing 페이지 기준으로 갱신할 것.
- */
 export interface ModelPricing {
-  input: number;
-  output: number;
+  input: number; // USD per 1M input tokens
+  output: number; // USD per 1M output tokens
 }
 
+/**
+ * 모델별 단가.
+ * - Claude: 공식 pricing 페이지 기준
+ * - Gemini: 무료 티어 사용 시 실질 비용 0 (일 1500회 한도 내)
+ */
 const PRICING_TABLE: Record<string, ModelPricing> = {
   'claude-haiku-4-5-20251001': { input: 1.0, output: 5.0 },
   'claude-sonnet-5': { input: 3.0, output: 15.0 },
   'claude-opus-5': { input: 15.0, output: 75.0 },
+  'gemini-1.5-flash': { input: 0, output: 0 },
+  'gemini-1.5-flash-8b': { input: 0, output: 0 },
+  'gemini-1.5-pro': { input: 0, output: 0 },
+  'gemini-2.0-flash': { input: 0, output: 0 },
+  'gemini-2.0-flash-lite': { input: 0, output: 0 },
 };
 
 const FALLBACK_PRICING: ModelPricing = { input: 1.0, output: 5.0 };

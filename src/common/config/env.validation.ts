@@ -32,6 +32,10 @@ export class EnvironmentVariables {
 
   @IsNotEmpty()
   @IsString()
+  GEMINI_MODEL!: string;
+
+  @IsNotEmpty()
+  @IsString()
   VOYAGE_MODEL!: string;
 }
 
