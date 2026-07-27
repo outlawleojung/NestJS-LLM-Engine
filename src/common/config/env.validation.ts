@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, MinLength, validateSync } from 'class-validator';
 
 export class EnvironmentVariables {
   @IsOptional()
@@ -9,10 +9,6 @@ export class EnvironmentVariables {
   @IsOptional()
   @IsString()
   NODE_ENV?: string;
-
-  @IsNotEmpty()
-  @IsString()
-  API_KEY!: string;
 
   @IsNotEmpty()
   @IsString()
@@ -27,15 +23,12 @@ export class EnvironmentVariables {
 
   @IsNotEmpty()
   @IsString()
-  ANTHROPIC_API_KEY!: string;
+  @MinLength(32, { message: 'SESSION_SECRET must be at least 32 characters' })
+  SESSION_SECRET!: string;
 
   @IsNotEmpty()
   @IsString()
   CLAUDE_MODEL!: string;
-
-  @IsNotEmpty()
-  @IsString()
-  VOYAGE_API_KEY!: string;
 
   @IsNotEmpty()
   @IsString()
