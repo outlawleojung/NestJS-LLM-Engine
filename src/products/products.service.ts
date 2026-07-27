@@ -30,6 +30,24 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
+  // 대량 등록용 — 임베딩을 한 번의 Voyage 호출로 처리한다 (N회 → 1회).
+  async createMany(voyageApiKey: string, dtos: CreateProductDto[]): Promise<Product[]> {
+    if (dtos.length === 0) return [];
+
+    const texts = dtos.map((d) => this.buildEmbeddingText(d.name, d.category, d.features));
+    const embeddings = await this.voyageProvider.embed(voyageApiKey, texts, 'document');
+
+    const entities = dtos.map((dto, i) =>
+      this.productRepository.create({
+        name: dto.name,
+        category: dto.category,
+        features: dto.features,
+        embedding: embeddings[i],
+      }),
+    );
+    return this.productRepository.save(entities);
+  }
+
   async findAll(): Promise<Product[]> {
     return this.productRepository.find({
       order: { createdAt: 'DESC' },

@@ -10,6 +10,8 @@ import { SAMPLE_PRODUCTS } from './sample-products';
 export class SeedController {
   constructor(private readonly productsService: ProductsService) {}
 
+  // 데모 상품 10개를 한 번에 넣는다.
+  // 임베딩은 Voyage 배치 호출 1회로 끝나 초기 로딩 시간이 짧다.
   @Post('products')
   @UseGuards(SessionGuard)
   @HttpCode(200)
@@ -23,27 +25,23 @@ export class SeedController {
       };
     }
 
-    const created = [];
-    const failed: { name: string; error: string }[] = [];
-    for (const dto of SAMPLE_PRODUCTS) {
-      try {
-        const product = await this.productsService.create(keys.voyageApiKey, dto);
-        created.push({ id: product.id, name: product.name });
-      } catch (error) {
-        failed.push({
-          name: dto.name,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+    try {
+      const created = await this.productsService.createMany(keys.voyageApiKey, SAMPLE_PRODUCTS);
+      return {
+        skipped: false,
+        createdCount: created.length,
+        failedCount: 0,
+        created: created.map((p) => ({ id: p.id, name: p.name })),
+        totalProducts: await this.productsService.count(),
+      };
+    } catch (error) {
+      return {
+        skipped: false,
+        createdCount: 0,
+        failedCount: SAMPLE_PRODUCTS.length,
+        error: error instanceof Error ? error.message : String(error),
+        totalProducts: existing,
+      };
     }
-
-    return {
-      skipped: false,
-      createdCount: created.length,
-      failedCount: failed.length,
-      created,
-      failed,
-      totalProducts: await this.productsService.count(),
-    };
   }
 }
