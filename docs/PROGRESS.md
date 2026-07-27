@@ -17,6 +17,8 @@
 | RAG 검색 | pgvector + Voyage 임베딩 | 벡터 검색으로 실제 RAG 구현 |
 | 임베딩 제공자 | Voyage AI (`voyage-3`, 1024차원) | Anthropic 공식 파트너 |
 | Claude 기본 모델 | `claude-haiku-4-5-20251001` | 데모 비용 최소화, 품질 충분 |
+| Gemini 지원 | 세션에서 provider 선택 가능 (`claude` \| `gemini`), 기본 `gemini-1.5-flash` | 무료 티어로 결제 없이 데모 실행 가능 |
+| LLM 추상화 | `LlmProvider` 인터페이스 + `LlmProviderFactory` | 제공자 교체가 컨트롤러/프로세서에 영향 없음 |
 | 인증 방식 | **BYOK 세션** (Redis + AES-256-GCM, TTL 1h) | 서버가 사용자 키를 소유하지 않도록 |
 | 서버 자체 API 키 (`x-api-key`) | **제거** | BYOK 도입으로 존재 이유 소멸 |
 | 프론트 | EJS 단일 페이지 (`/`) | 세션 쿠키를 그대로 활용, 별도 프론트 프레임워크 없음 |

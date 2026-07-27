@@ -4,7 +4,9 @@ NestJS 기반 LLM 백엔드 서비스.
 Claude API로 상품 상세페이지 카피를 생성하고, pgvector + Voyage 임베딩으로 RAG Q&A를 제공한다.
 모든 AI 호출은 BullMQ 비동기 큐로 처리하며 상태·토큰·비용을 DB에 남긴다.
 
-**BYOK (Bring Your Own Keys)** 방식으로 동작한다. 서버는 API 키를 보관하지 않으며, 사용자가 웹 UI에서 자신의 Anthropic·Voyage 키를 입력하면 서버가 AES-256-GCM으로 암호화해 Redis 세션에 1시간 TTL로 저장하고, 큐 워커도 세션에서 키를 조회해 호출한다.
+**BYOK (Bring Your Own Keys)** 방식으로 동작한다. 서버는 API 키를 보관하지 않으며, 사용자가 웹 UI에서 자신의 LLM(Claude 또는 Gemini)·Voyage 키를 입력하면 서버가 AES-256-GCM으로 암호화해 Redis 세션에 1시간 TTL로 저장하고, 큐 워커도 세션에서 키를 조회해 호출한다.
+
+**LLM 제공자는 세션 등록 시 선택 가능**하다. 프로덕션에서 Claude를 쓰는 스토리를 유지하면서, 무료로 데모를 돌리고 싶으면 Gemini를 고를 수 있다.
 
 ## 주요 기능
 
@@ -22,7 +24,7 @@ Claude API로 상품 상세페이지 카피를 생성하고, pgvector + Voyage �
 - **DB**: PostgreSQL 16 + pgvector 확장
 - **Queue**: Redis + BullMQ
 - **View**: EJS
-- **LLM**: Anthropic Claude (기본 `claude-haiku-4-5-20251001`)
+- **LLM**: 선택 가능 — Anthropic Claude (`claude-haiku-4-5-20251001`) 또는 Google Gemini (`gemini-1.5-flash`)
 - **Embedding**: Voyage AI `voyage-3` (1024차원)
 - **Auth**: BYOK — 사용자 API 키를 세션(Redis, AES-256-GCM)에 저장, 쿠키로 참조
 
@@ -35,6 +37,7 @@ Claude API로 상품 상세페이지 카피를 생성하고, pgvector + Voyage �
 | BullMQ | LLM 호출은 지연 편차가 크므로 큐 기반 비동기 + 자동 재시도 |
 | Claude Haiku 4.5 | 카피/RAG 답변 품질에 충분하면서 저비용 |
 | BYOK + 세션 | 데모 서버에서 서버 소유 키 노출 위험 제거, 사용자가 자기 비용 부담 |
+| LLM 제공자 인터페이스 | `LlmProvider` 추상화 + 팩토리로 Claude/Gemini 교체 가능, 세션에 저장된 값으로 선택 |
 | EJS | 별도 프론트엔드 없이 서버가 세션 쿠키를 그대로 활용할 수 있어 통합 단순 |
 
 ## 실행 방법
@@ -43,7 +46,9 @@ Claude API로 상품 상세페이지 카피를 생성하고, pgvector + Voyage �
 
 - Node.js 20+
 - Docker (PostgreSQL + Redis)
-- 본인의 API 키: Anthropic, Voyage AI (실행 후 웹 UI에서 입력)
+- 본인의 API 키 (실행 후 웹 UI에서 입력):
+  - LLM: **Google Gemini** (https://aistudio.google.com/apikey — 무료, 카드 등록 불필요) 또는 **Anthropic Claude** (https://console.anthropic.com — 유료 크레딧 필요)
+  - Embedding: **Voyage AI** (https://dash.voyageai.com — 월 200M 토큰 무료 티어)
 
 ### 2. 셋업
 
@@ -67,7 +72,7 @@ npm run start:dev
 
 브라우저에서 http://localhost:3000 접속.
 
-1. **API 키 세션** 섹션에 본인의 Anthropic / Voyage 키 입력 → "세션 시작"
+1. **API 키 세션** 섹션에서 **AI 제공자 선택** (Gemini 무료 권장) → 해당 키 + Voyage 키 입력 → "세션 시작"
 2. **상품 등록** — 등록 시 Voyage 임베딩이 자동 생성돼 DB에 저장됨
 3. **카피 생성** — 등록한 상품 ID 입력 → 요청 → 반환된 `requestId`를 하단에서 조회
 4. **RAG Q&A** — 자연어 질문 입력 → 유사 상품 검색 + Claude 답변
