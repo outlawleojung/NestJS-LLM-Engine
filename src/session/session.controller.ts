@@ -13,7 +13,8 @@ export class SessionController {
   @HttpCode(204)
   async create(@Body() dto: CreateSessionDto, @Res({ passthrough: true }) res: Response): Promise<void> {
     const sessionId = await this.sessionService.create({
-      anthropicApiKey: dto.anthropicApiKey,
+      provider: dto.provider,
+      llmApiKey: dto.llmApiKey,
       voyageApiKey: dto.voyageApiKey,
     });
     res.cookie(SESSION_COOKIE, sessionId, {
