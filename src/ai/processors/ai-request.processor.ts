@@ -14,7 +14,7 @@ import {
   AiRequestType,
 } from '../entities/ai-request.entity';
 import { buildCopyPrompt, buildQaPrompt } from '../prompts';
-import { ClaudeProvider } from '../providers/claude.provider';
+import { LlmProviderFactory } from '../providers/llm-provider.factory';
 import { VoyageProvider } from '../providers/voyage.provider';
 
 @Processor(AI_REQUEST_QUEUE)
@@ -25,7 +25,7 @@ export class AiRequestProcessor extends WorkerHost {
     @InjectRepository(AiRequest)
     private readonly aiRequestRepository: Repository<AiRequest>,
     private readonly productsService: ProductsService,
-    private readonly claudeProvider: ClaudeProvider,
+    private readonly llmFactory: LlmProviderFactory,
     private readonly voyageProvider: VoyageProvider,
     private readonly sessionService: SessionService,
   ) {
@@ -87,7 +87,8 @@ export class AiRequestProcessor extends WorkerHost {
     const product = await this.productsService.findOne(productId);
     const { system, prompt } = buildCopyPrompt(product);
 
-    const result = await this.claudeProvider.complete(keys.anthropicApiKey, {
+    const llm = this.llmFactory.get(keys.provider);
+    const result = await llm.complete(keys.llmApiKey, {
       system,
       prompt,
       maxTokens: 1024,
@@ -105,7 +106,8 @@ export class AiRequestProcessor extends WorkerHost {
     const products = await this.productsService.searchSimilar(questionEmbedding, input.topK);
 
     const { system, prompt } = buildQaPrompt(input.question, products);
-    const result = await this.claudeProvider.complete(keys.anthropicApiKey, {
+    const llm = this.llmFactory.get(keys.provider);
+    const result = await llm.complete(keys.llmApiKey, {
       system,
       prompt,
       maxTokens: 1024,

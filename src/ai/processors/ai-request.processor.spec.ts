@@ -9,7 +9,7 @@ import {
   AiRequestStatus,
   AiRequestType,
 } from '../entities/ai-request.entity';
-import { ClaudeProvider } from '../providers/claude.provider';
+import { LlmProviderFactory } from '../providers/llm-provider.factory';
 import { VoyageProvider } from '../providers/voyage.provider';
 import { AiRequestProcessor } from './ai-request.processor';
 
@@ -23,13 +23,14 @@ function makeJob(requestId: string, attemptsMade = 0): JobStub {
   } as unknown as JobStub;
 }
 
-const KEYS = { anthropicApiKey: 'sk-ant-x', voyageApiKey: 'pa-x' };
+const KEYS = { provider: 'gemini' as const, llmApiKey: 'AIza-x', voyageApiKey: 'pa-x' };
 
 describe('AiRequestProcessor', () => {
   let processor: AiRequestProcessor;
   let repository: { findOne: jest.Mock; update: jest.Mock };
   let productsService: { findOne: jest.Mock; searchSimilar: jest.Mock };
-  let claude: { complete: jest.Mock };
+  let llm: { complete: jest.Mock };
+  let llmFactory: { get: jest.Mock };
   let voyage: { embedOne: jest.Mock };
   let sessionService: { get: jest.Mock };
 
@@ -39,7 +40,8 @@ describe('AiRequestProcessor', () => {
       update: jest.fn().mockResolvedValue(undefined),
     };
     productsService = { findOne: jest.fn(), searchSimilar: jest.fn() };
-    claude = { complete: jest.fn() };
+    llm = { complete: jest.fn() };
+    llmFactory = { get: jest.fn().mockReturnValue(llm) };
     voyage = { embedOne: jest.fn() };
     sessionService = { get: jest.fn().mockResolvedValue(KEYS) };
 
@@ -48,7 +50,7 @@ describe('AiRequestProcessor', () => {
         AiRequestProcessor,
         { provide: getRepositoryToken(AiRequest), useValue: repository },
         { provide: ProductsService, useValue: productsService },
-        { provide: ClaudeProvider, useValue: claude },
+        { provide: LlmProviderFactory, useValue: llmFactory },
         { provide: VoyageProvider, useValue: voyage },
         { provide: SessionService, useValue: sessionService },
       ],
@@ -58,7 +60,7 @@ describe('AiRequestProcessor', () => {
   });
 
   describe('process — COPY_GENERATION', () => {
-    it('세션 키를 조회해 Claude를 호출하고 결과·토큰·비용을 저장한다', async () => {
+    it('세션에 저장된 provider의 LLM을 팩토리로 골라 호출한다', async () => {
       repository.findOne.mockResolvedValueOnce({
         id: 'r1',
         requestId: 'req-1',
@@ -71,17 +73,19 @@ describe('AiRequestProcessor', () => {
         category: '오디오',
         features: '노캔',
       });
-      claude.complete.mockResolvedValueOnce({
+      llm.complete.mockResolvedValueOnce({
         text: '# 카피',
         inputTokens: 200,
         outputTokens: 400,
-        model: 'claude-haiku-4-5-20251001',
+        model: 'gemini-1.5-flash',
+        provider: 'gemini',
       });
 
       await processor.process(makeJob('req-1'));
 
       expect(sessionService.get).toHaveBeenCalledWith('sess-x');
-      expect(claude.complete).toHaveBeenCalledWith(KEYS.anthropicApiKey, expect.any(Object));
+      expect(llmFactory.get).toHaveBeenCalledWith('gemini');
+      expect(llm.complete).toHaveBeenCalledWith(KEYS.llmApiKey, expect.any(Object));
       const finalUpdate = repository.update.mock.calls.at(-1)?.[1];
       expect(finalUpdate).toMatchObject({
         status: AiRequestStatus.COMPLETED,
@@ -93,7 +97,7 @@ describe('AiRequestProcessor', () => {
   });
 
   describe('process — QA', () => {
-    it('세션 키로 질문을 임베딩하고 유사 상품 검색 후 답변을 생성한다', async () => {
+    it('Voyage로 질문을 임베딩하고 유사 상품 검색 후 LLM 답변을 생성한다', async () => {
       repository.findOne.mockResolvedValueOnce({
         id: 'r2',
         requestId: 'req-2',
@@ -104,23 +108,24 @@ describe('AiRequestProcessor', () => {
       productsService.searchSimilar.mockResolvedValueOnce([
         { id: 'p1', name: 'A', category: 'audio', features: '노캔' },
       ]);
-      claude.complete.mockResolvedValueOnce({
+      llm.complete.mockResolvedValueOnce({
         text: '추천: A',
         inputTokens: 300,
         outputTokens: 100,
-        model: 'claude-haiku-4-5-20251001',
+        model: 'gemini-1.5-flash',
+        provider: 'gemini',
       });
 
       await processor.process(makeJob('req-2'));
 
       expect(voyage.embedOne).toHaveBeenCalledWith(KEYS.voyageApiKey, '노캔 헤드폰 추천', 'query');
       expect(productsService.searchSimilar).toHaveBeenCalledWith([0.1, 0.2], 3);
-      expect(claude.complete).toHaveBeenCalledWith(KEYS.anthropicApiKey, expect.any(Object));
+      expect(llm.complete).toHaveBeenCalledWith(KEYS.llmApiKey, expect.any(Object));
     });
   });
 
   describe('process — 에러 처리', () => {
-    it('Claude 호출 실패 시 errorMessage를 기록하고 예외를 다시 던진다', async () => {
+    it('LLM 호출 실패 시 errorMessage를 기록하고 예외를 다시 던진다', async () => {
       repository.findOne.mockResolvedValueOnce({
         id: 'r3',
         requestId: 'req-3',
@@ -133,7 +138,7 @@ describe('AiRequestProcessor', () => {
         category: 'C',
         features: 'F',
       });
-      claude.complete.mockRejectedValueOnce(new Error('rate limit'));
+      llm.complete.mockRejectedValueOnce(new Error('rate limit'));
 
       await expect(processor.process(makeJob('req-3', 1))).rejects.toThrow('rate limit');
 
