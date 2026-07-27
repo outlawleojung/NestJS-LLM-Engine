@@ -31,15 +31,25 @@ export class ProductsService {
   }
 
   async findAll(): Promise<Product[]> {
-    return this.productRepository.find({ order: { createdAt: 'DESC' } });
+    return this.productRepository.find({
+      order: { createdAt: 'DESC' },
+      select: ['id', 'name', 'category', 'features', 'createdAt', 'updatedAt'],
+    });
   }
 
   async findOne(id: string): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { id } });
+    const product = await this.productRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'category', 'features', 'createdAt', 'updatedAt'],
+    });
     if (!product) {
       throw new NotFoundException(`Product ${id} not found`);
     }
     return product;
+  }
+
+  async count(): Promise<number> {
+    return this.productRepository.count();
   }
 
   async searchSimilar(queryEmbedding: number[], limit = 5): Promise<Product[]> {
