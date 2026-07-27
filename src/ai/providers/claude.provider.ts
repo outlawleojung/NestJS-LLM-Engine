@@ -2,15 +2,16 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-export interface ClaudeCompletionResult {
-  text: string;
-  inputTokens: number;
-  outputTokens: number;
-  model: string;
-}
+import {
+  LlmCompletionParams,
+  LlmCompletionResult,
+  LlmProvider,
+  LlmProviderName,
+} from './llm-provider.interface';
 
 @Injectable()
-export class ClaudeProvider {
+export class ClaudeProvider implements LlmProvider {
+  readonly name: LlmProviderName = 'claude';
   private readonly logger = new Logger(ClaudeProvider.name);
   private readonly model: string;
 
@@ -18,14 +19,7 @@ export class ClaudeProvider {
     this.model = configService.getOrThrow<string>('CLAUDE_MODEL');
   }
 
-  async complete(
-    apiKey: string,
-    params: {
-      system?: string;
-      prompt: string;
-      maxTokens?: number;
-    },
-  ): Promise<ClaudeCompletionResult> {
+  async complete(apiKey: string, params: LlmCompletionParams): Promise<LlmCompletionResult> {
     const client = new Anthropic({ apiKey });
     const response = await client.messages.create({
       model: this.model,
@@ -44,6 +38,7 @@ export class ClaudeProvider {
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
       model: response.model,
+      provider: this.name,
     };
   }
 }
