@@ -17,6 +17,9 @@ const PRICING_TABLE: Record<string, ModelPricing> = {
   'gemini-1.5-pro': { input: 0, output: 0 },
   'gemini-2.0-flash': { input: 0, output: 0 },
   'gemini-2.0-flash-lite': { input: 0, output: 0 },
+  'gemini-2.5-flash': { input: 0, output: 0 },
+  'gemini-2.5-flash-lite': { input: 0, output: 0 },
+  'gemini-2.5-pro': { input: 0, output: 0 },
 };
 
 const FALLBACK_PRICING: ModelPricing = { input: 1.0, output: 5.0 };
