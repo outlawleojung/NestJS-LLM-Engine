@@ -9,137 +9,220 @@
     * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 960px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6;
+      max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6;
     }
-    h1 { margin-bottom: 0.2rem; }
-    .subtitle { color: #666; margin-bottom: 2rem; }
+    header { margin-bottom: 2rem; }
+    h1 { margin: 0 0 0.4rem; }
+    .tagline { color: #666; margin: 0; }
+    .intro-box {
+      background: #f5f7fa; border-left: 3px solid #4a7bd0;
+      padding: 0.9rem 1.1rem; margin-top: 1rem; border-radius: 4px; font-size: 0.95rem;
+    }
+    .intro-box strong { color: #2a5db0; }
     section {
       border: 1px solid #ddd; border-radius: 8px; padding: 1.2rem 1.4rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.2rem; background: #fff;
     }
-    section h2 { margin-top: 0; font-size: 1.15rem; }
-    label { display: block; font-size: 0.9rem; margin-top: 0.6rem; font-weight: 600; }
+    section.locked { opacity: 0.55; pointer-events: none; }
+    section.locked::before {
+      content: '🔒 위 단계를 먼저 완료하세요';
+      display: block; font-size: 0.8rem; color: #888; margin-bottom: 0.5rem;
+    }
+    section h2 {
+      margin: 0 0 0.3rem; font-size: 1.05rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    section h2 .step {
+      background: #4a7bd0; color: #fff; border-radius: 50%;
+      width: 1.5rem; height: 1.5rem; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 0.85rem;
+    }
+    section h2 .step.done { background: #2fa84f; }
+    section .desc { color: #666; font-size: 0.88rem; margin: 0 0 0.9rem; }
+    label { display: block; font-size: 0.85rem; margin-top: 0.7rem; font-weight: 600; color: #444; }
     input, textarea, button, select {
-      width: 100%; padding: 0.5rem 0.7rem; margin-top: 0.25rem;
+      width: 100%; padding: 0.55rem 0.75rem; margin-top: 0.25rem;
       border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem;
-      font-family: inherit;
+      font-family: inherit; background: #fff; color: #222;
     }
-    textarea { min-height: 5rem; resize: vertical; }
+    textarea { min-height: 3.5rem; resize: vertical; }
     button {
       background: #2a2a2a; color: #fff; cursor: pointer;
-      margin-top: 0.8rem; border: none;
+      margin-top: 0.6rem; border: none; font-weight: 500;
     }
-    button:hover { background: #444; }
+    button:hover:not(:disabled) { background: #444; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     button.secondary { background: #e2e2e2; color: #222; }
-    button.secondary:hover { background: #d0d0d0; }
-    pre {
-      background: #f5f5f5; padding: 0.8rem; border-radius: 4px;
-      white-space: pre-wrap; word-break: break-word; max-height: 24rem; overflow: auto;
+    button.secondary:hover:not(:disabled) { background: #d0d0d0; }
+    button.primary { background: #4a7bd0; }
+    button.primary:hover:not(:disabled) { background: #3a6bc0; }
+    .row { display: flex; gap: 0.6rem; align-items: flex-end; }
+    .row > * { flex: 1; }
+    .row button { flex: 0 0 auto; width: auto; padding: 0.55rem 1.2rem; }
+    .muted { color: #888; font-size: 0.82rem; }
+    .badge {
+      display: inline-block; padding: 0.1rem 0.5rem; border-radius: 10px;
+      font-size: 0.7rem; font-weight: 600; margin-left: 0.4rem;
+    }
+    .badge.ok { background: #d1f5d1; color: #1a5c1a; }
+    .badge.warn { background: #fff2cd; color: #7a5a00; }
+    .badge.err { background: #ffd6d6; color: #8b1a1a; }
+    .result {
+      background: #f7f7f9; padding: 0.9rem 1rem; border-radius: 6px;
+      margin-top: 0.9rem; white-space: pre-wrap; word-break: break-word;
+      font-size: 0.92rem; line-height: 1.55;
+      max-height: 22rem; overflow: auto;
+    }
+    .result.err { background: #fff2f0; color: #8b1a1a; }
+    .product-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.5rem; margin-top: 0.8rem;
+    }
+    .product-card {
+      background: #f7f7f9; padding: 0.6rem 0.8rem; border-radius: 6px;
       font-size: 0.85rem;
     }
-    .status {
-      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px;
-      font-size: 0.75rem; font-weight: 600;
+    .product-card .cat { color: #888; font-size: 0.72rem; }
+    .product-card .nm { font-weight: 600; margin: 0.1rem 0; }
+    .chat-log {
+      display: flex; flex-direction: column; gap: 0.6rem;
+      margin-top: 0.8rem; max-height: 26rem; overflow-y: auto; padding-right: 0.3rem;
     }
-    .status.ok { background: #d1f5d1; color: #1a5c1a; }
-    .status.warn { background: #fff2cd; color: #7a5a00; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-    .muted { color: #888; font-size: 0.85rem; }
+    .chat-msg { padding: 0.6rem 0.9rem; border-radius: 10px; max-width: 88%; font-size: 0.92rem; }
+    .chat-msg.user { align-self: flex-end; background: #4a7bd0; color: #fff; }
+    .chat-msg.ai { align-self: flex-start; background: #f0f0f2; color: #222; }
+    .chat-msg.thinking { color: #888; font-style: italic; }
+    .chat-msg .products {
+      margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed #bbb;
+      font-size: 0.78rem; color: #666;
+    }
+    .spinner {
+      display: inline-block; width: 0.9rem; height: 0.9rem; border: 2px solid #ccc;
+      border-top-color: #4a7bd0; border-radius: 50%; animation: spin 0.8s linear infinite;
+      vertical-align: middle; margin-right: 0.4rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .usage-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+    .usage-stat {
+      background: #f7f7f9; padding: 0.6rem; border-radius: 6px; text-align: center;
+    }
+    .usage-stat .n { font-size: 1.15rem; font-weight: 700; color: #4a7bd0; }
+    .usage-stat .l { font-size: 0.75rem; color: #666; }
     @media (prefers-color-scheme: dark) {
       body { background: #1a1a1a; color: #e0e0e0; }
-      section { border-color: #333; }
+      section { background: #222; border-color: #333; }
+      .intro-box { background: #1e2735; }
       input, textarea, select { background: #262626; color: #e0e0e0; border-color: #444; }
-      pre { background: #242424; }
-      .subtitle, .muted { color: #999; }
-      button.secondary { background: #333; color: #eee; }
+      .tagline, .desc, .muted { color: #aaa; }
+      .result, .product-card, .usage-stat { background: #2a2a2a; }
+      .chat-msg.ai { background: #2e2e30; color: #e0e0e0; }
+      .result.err { background: #3a1e1e; color: #f5a5a5; }
+      button.secondary { background: #3a3a3a; color: #ddd; }
     }
   </style>
 </head>
 <body>
-  <h1>NestJS LLM Engine</h1>
-  <p class="subtitle">
-    Claude 카피 생성 + Voyage 임베딩 RAG Q&amp;A 데모.
-    본인의 API 키를 입력해 실행합니다. 키는 세션에 암호화 저장되며 1시간 후 만료됩니다.
-  </p>
+  <header>
+    <h1>NestJS LLM Engine</h1>
+    <p class="tagline">쇼핑몰을 위한 AI 백엔드 데모</p>
+    <div class="intro-box">
+      두 가지 기능을 시연합니다.
+      <br>1. <strong>AI 카피 생성</strong> — 상품 정보를 넣으면 Claude가 상세페이지 카피를 씁니다.
+      <br>2. <strong>RAG 챗봇</strong> — 자연어 질문에 대해, 벡터 검색으로 관련 상품을 찾아 Claude가 답합니다.
+      <br>기술 스택: <em>NestJS · Claude · Voyage 임베딩 · pgvector · BullMQ 비동기 큐</em>
+    </div>
+  </header>
 
-  <section>
-    <h2>
-      1. API 키 세션
-      <span class="status <%= hasSession ? 'ok' : 'warn' %>">
-        <%= hasSession ? '연결됨' : '키 필요' %>
-      </span>
+  <!-- STEP 1: API 키 -->
+  <section id="s-keys">
+    <h2><span class="step <%= hasSession ? 'done' : '' %>">1</span> 내 API 키 등록
+      <% if (hasSession) { %><span class="badge ok">연결됨</span><% } else { %><span class="badge warn">필요</span><% } %>
     </h2>
-    <form id="session-form">
-      <label>Anthropic API Key</label>
-      <input type="password" name="anthropicApiKey" placeholder="sk-ant-..." autocomplete="off" required />
-      <label>Voyage API Key</label>
-      <input type="password" name="voyageApiKey" placeholder="pa-..." autocomplete="off" required />
-      <div class="grid">
-        <button type="submit">세션 시작</button>
-        <button type="button" class="secondary" id="session-clear">세션 삭제</button>
+    <p class="desc">
+      Anthropic Claude 키(생성용) + Voyage AI 키(임베딩용). 키는 서버에서 AES-256-GCM 암호화 후 Redis 세션에 1시간 저장됩니다.
+    </p>
+    <% if (!hasSession) { %>
+      <form id="key-form">
+        <label>Anthropic API Key</label>
+        <input type="password" name="anthropicApiKey" placeholder="sk-ant-..." autocomplete="off" required />
+        <label>Voyage API Key</label>
+        <input type="password" name="voyageApiKey" placeholder="pa-..." autocomplete="off" required />
+        <button type="submit" class="primary">세션 시작</button>
+      </form>
+    <% } else { %>
+      <div class="row">
+        <span class="muted">키가 등록되어 있습니다.</span>
+        <button type="button" class="secondary" id="key-clear">세션 삭제</button>
       </div>
-      <p class="muted">키는 서버에서 AES-256-GCM으로 암호화되어 Redis에 저장됩니다. TTL 1시간.</p>
-    </form>
-    <pre id="session-result" hidden></pre>
+    <% } %>
+    <div id="key-msg"></div>
   </section>
 
-  <section>
-    <h2>2. 상품 등록 (등록 시 임베딩 자동 생성)</h2>
-    <form id="product-form">
-      <label>상품명</label>
-      <input name="name" required placeholder="무선 노이즈캔슬링 헤드폰" />
-      <label>카테고리</label>
-      <input name="category" required placeholder="오디오/헤드폰" />
-      <label>특징</label>
-      <textarea name="features" required placeholder="액티브 노이즈 캔슬링, 30시간 배터리, 블루투스 5.3"></textarea>
-      <button type="submit">등록</button>
-    </form>
-    <pre id="product-result" hidden></pre>
-
-    <label style="margin-top:1rem;">등록된 상품</label>
-    <button type="button" class="secondary" id="product-list-btn">목록 새로고침</button>
-    <pre id="product-list" hidden></pre>
+  <!-- STEP 2: 시드 -->
+  <section id="s-seed" class="<%= hasSession ? '' : 'locked' %>">
+    <h2><span class="step" id="seed-step">2</span> 데모 상품 준비
+      <span class="badge warn" id="seed-badge">비어있음</span>
+    </h2>
+    <p class="desc">
+      RAG가 검색할 상품이 DB에 있어야 데모가 됩니다. 클릭 한 번으로 다양한 카테고리의 샘플 10개를 등록합니다.
+      (등록 시 Voyage로 임베딩이 자동 생성돼 pgvector에 저장됩니다.)
+    </p>
+    <button type="button" class="primary" id="seed-btn">샘플 상품 10개 채우기</button>
+    <div id="seed-msg"></div>
+    <div class="product-list" id="product-list"></div>
   </section>
 
-  <section>
-    <h2>3. 상세페이지 카피 생성 (비동기)</h2>
-    <form id="copy-form">
-      <label>Product ID (UUID)</label>
-      <input name="productId" required placeholder="위에서 등록 후 반환된 id를 붙여넣기" />
-      <button type="submit">카피 요청</button>
-    </form>
-    <pre id="copy-result" hidden></pre>
+  <!-- STEP 3: 카피 생성 -->
+  <section id="s-copy" class="locked">
+    <h2><span class="step">3</span> AI 카피 생성 시연</h2>
+    <p class="desc">
+      상품을 하나 고르면 Claude가 상세페이지용 마케팅 카피를 작성합니다. (비동기 큐로 처리되며 결과가 자동으로 표시됩니다.)
+    </p>
+    <label>상품 선택</label>
+    <div class="row">
+      <select id="copy-select"></select>
+      <button type="button" class="primary" id="copy-btn">카피 생성</button>
+    </div>
+    <div id="copy-result"></div>
   </section>
 
-  <section>
-    <h2>4. RAG Q&amp;A (비동기)</h2>
-    <form id="qa-form">
-      <label>질문</label>
-      <textarea name="question" required placeholder="노이즈 캔슬링 되고 배터리 오래가는 헤드폰 추천해줘"></textarea>
-      <label>Top-K (검색할 유사 상품 수)</label>
-      <input name="topK" type="number" min="1" max="20" value="5" />
-      <button type="submit">Q&amp;A 요청</button>
+  <!-- STEP 4: RAG 챗 -->
+  <section id="s-chat" class="locked">
+    <h2><span class="step">4</span> RAG 챗봇 시연</h2>
+    <p class="desc">
+      자연어로 질문하면 (1) 질문을 임베딩 → (2) pgvector로 유사 상품 top-5 검색 → (3) 검색된 상품을 근거로 Claude가 답변합니다.
+    </p>
+    <div class="chat-log" id="chat-log">
+      <div class="chat-msg ai">
+        예: "여름에 얼굴 탈까봐 걱정인데 뭐 사야 해?"<br>
+        예: "무선으로 쓸 수 있는 사무실 주변기기 뭐 있어?"<br>
+        예: "노이즈 캔슬링 되는 오디오 제품 추천해줘"
+      </div>
+    </div>
+    <form id="chat-form">
+      <div class="row">
+        <input type="text" id="chat-input" placeholder="질문을 입력하세요..." autocomplete="off" />
+        <button type="submit" class="primary" id="chat-send">보내기</button>
+      </div>
     </form>
-    <pre id="qa-result" hidden></pre>
   </section>
 
-  <section>
-    <h2>5. 요청 결과 조회 / 사용량</h2>
-    <label>Request ID</label>
-    <input id="request-id-input" placeholder="위 카피/Q&A 요청 후 반환된 requestId" />
-    <button type="button" id="request-fetch-btn">조회</button>
-    <pre id="request-result" hidden></pre>
-
-    <label style="margin-top:1rem;">전체 사용량 (기간 미지정)</label>
-    <button type="button" class="secondary" id="usage-btn">사용량 조회</button>
-    <pre id="usage-result" hidden></pre>
+  <!-- 사용량 -->
+  <section id="s-usage">
+    <h2>누적 사용량 <button type="button" class="secondary" id="usage-btn" style="width:auto;padding:0.2rem 0.6rem;font-size:0.75rem;margin-top:0;">새로고침</button></h2>
+    <div class="usage-stats">
+      <div class="usage-stat"><div class="n" id="u-count">-</div><div class="l">완료된 요청</div></div>
+      <div class="usage-stat"><div class="n" id="u-tokens">-</div><div class="l">총 토큰</div></div>
+      <div class="usage-stat"><div class="n" id="u-cost">-</div><div class="l">누적 비용 (USD)</div></div>
+    </div>
   </section>
 
   <script>
-    function show(el, data) {
-      el.hidden = false;
-      el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-    }
+    const hasSession = <%= hasSession ? 'true' : 'false' %>;
+
     async function callJson(url, options = {}) {
       const res = await fetch(url, {
         credentials: 'same-origin',
@@ -149,86 +232,244 @@
       const text = await res.text();
       let body;
       try { body = text ? JSON.parse(text) : null; } catch { body = text; }
-      if (!res.ok) throw new Error(`${res.status} ${JSON.stringify(body)}`);
+      if (!res.ok) {
+        const msg = body && body.message ? (Array.isArray(body.message) ? body.message.join(', ') : body.message) : text;
+        throw new Error(`${res.status} ${msg}`);
+      }
       return body;
     }
-    function formData(form) {
-      const fd = new FormData(form);
-      const obj = {};
-      fd.forEach((v, k) => { obj[k] = v; });
-      return obj;
+    function el(id) { return document.getElementById(id); }
+    function setMsg(id, text, kind) {
+      const e = el(id);
+      e.innerHTML = '';
+      if (!text) return;
+      const div = document.createElement('div');
+      div.className = 'result' + (kind === 'err' ? ' err' : '');
+      div.textContent = text;
+      e.appendChild(div);
+    }
+    function unlock(sectionId) { el(sectionId).classList.remove('locked'); }
+    function lock(sectionId) { el(sectionId).classList.add('locked'); }
+
+    // --- STEP 1: 키 세션 ---
+    const keyForm = el('key-form');
+    if (keyForm) {
+      keyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        try {
+          await callJson('/session', {
+            method: 'POST',
+            body: JSON.stringify({
+              anthropicApiKey: fd.get('anthropicApiKey'),
+              voyageApiKey: fd.get('voyageApiKey'),
+            }),
+          });
+          setMsg('key-msg', '세션 시작. 새로고침 중...');
+          setTimeout(() => location.reload(), 400);
+        } catch (err) { setMsg('key-msg', String(err.message), 'err'); }
+      });
+    }
+    const keyClear = el('key-clear');
+    if (keyClear) {
+      keyClear.addEventListener('click', async () => {
+        try {
+          await fetch('/session', { method: 'DELETE', credentials: 'same-origin' });
+          setTimeout(() => location.reload(), 200);
+        } catch (err) { setMsg('key-msg', String(err.message), 'err'); }
+      });
     }
 
-    document.getElementById('session-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const el = document.getElementById('session-result');
+    // --- STEP 2: 상품 로드 + 시드 ---
+    async function loadProducts() {
       try {
-        await callJson('/session', { method: 'POST', body: JSON.stringify(formData(e.target)) });
-        show(el, '세션 시작됨. 새로고침 중...');
-        setTimeout(() => window.location.reload(), 400);
-      } catch (err) { show(el, String(err.message)); }
-    });
+        const products = await callJson('/products');
+        renderProducts(products);
+        renderProductSelect(products);
+        updateSeedBadge(products.length);
+        if (products.length > 0) {
+          unlock('s-copy');
+          unlock('s-chat');
+        } else {
+          lock('s-copy');
+          lock('s-chat');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    function renderProducts(products) {
+      const list = el('product-list');
+      list.innerHTML = '';
+      if (products.length === 0) {
+        list.innerHTML = '<div class="muted">아직 상품이 없습니다.</div>';
+        return;
+      }
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `<div class="cat">${p.category}</div><div class="nm">${p.name}</div><div class="muted">${p.features}</div>`;
+        list.appendChild(card);
+      });
+    }
+    function renderProductSelect(products) {
+      const sel = el('copy-select');
+      sel.innerHTML = '';
+      products.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (${p.category})`;
+        sel.appendChild(opt);
+      });
+    }
+    function updateSeedBadge(count) {
+      const badge = el('seed-badge');
+      const step = el('seed-step');
+      if (count === 0) {
+        badge.textContent = '비어있음';
+        badge.className = 'badge warn';
+      } else {
+        badge.textContent = `${count}개 등록됨`;
+        badge.className = 'badge ok';
+        step.classList.add('done');
+      }
+    }
+    const seedBtn = el('seed-btn');
+    if (seedBtn) {
+      seedBtn.addEventListener('click', async () => {
+        seedBtn.disabled = true;
+        setMsg('seed-msg', '샘플 상품 등록 중... (Voyage 임베딩 API 호출 10회, 약 10~20초 소요)');
+        try {
+          const res = await callJson('/seed/products', { method: 'POST' });
+          if (res.skipped) {
+            setMsg('seed-msg', res.message);
+          } else {
+            setMsg('seed-msg', `등록 완료: ${res.createdCount}개 성공, ${res.failedCount}개 실패. (총 ${res.totalProducts}개)`);
+          }
+          await loadProducts();
+        } catch (err) {
+          setMsg('seed-msg', String(err.message), 'err');
+        } finally {
+          seedBtn.disabled = false;
+        }
+      });
+    }
 
-    document.getElementById('session-clear').addEventListener('click', async () => {
-      const el = document.getElementById('session-result');
+    // --- 폴링 헬퍼 ---
+    async function pollRequest(requestId, onUpdate, timeoutMs = 60000) {
+      const start = Date.now();
+      while (Date.now() - start < timeoutMs) {
+        const res = await callJson('/ai/requests/' + encodeURIComponent(requestId));
+        if (onUpdate) onUpdate(res);
+        if (res.status === 'COMPLETED' || res.status === 'FAILED') return res;
+        await new Promise(r => setTimeout(r, 1200));
+      }
+      throw new Error('타임아웃 (60초)');
+    }
+
+    // --- STEP 3: 카피 생성 ---
+    const copyBtn = el('copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        const productId = el('copy-select').value;
+        if (!productId) return;
+        const resultEl = el('copy-result');
+        resultEl.innerHTML = '<div class="result"><span class="spinner"></span>요청 접수 중...</div>';
+        copyBtn.disabled = true;
+        try {
+          const { requestId } = await callJson('/ai/copy', {
+            method: 'POST', body: JSON.stringify({ productId }),
+          });
+          const done = await pollRequest(requestId, (res) => {
+            resultEl.innerHTML = `<div class="result"><span class="spinner"></span>상태: ${res.status}...</div>`;
+          });
+          if (done.status === 'COMPLETED') {
+            const cost = done.cost ? `$${done.cost}` : '';
+            const tok = `토큰: in ${done.inputTokens} · out ${done.outputTokens}`;
+            resultEl.innerHTML = '';
+            const box = document.createElement('div');
+            box.className = 'result';
+            box.textContent = done.output;
+            const meta = document.createElement('div');
+            meta.className = 'muted';
+            meta.style.marginTop = '0.4rem';
+            meta.textContent = `${tok} ${cost ? '· 비용 ' + cost : ''}`;
+            resultEl.appendChild(box);
+            resultEl.appendChild(meta);
+            loadUsage();
+          } else {
+            setMsg('copy-result', '실패: ' + (done.errorMessage || 'unknown'), 'err');
+          }
+        } catch (err) {
+          setMsg('copy-result', String(err.message), 'err');
+        } finally {
+          copyBtn.disabled = false;
+        }
+      });
+    }
+
+    // --- STEP 4: 챗 ---
+    function chatBubble(kind, text, cls) {
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + kind + (cls ? ' ' + cls : '');
+      div.textContent = text;
+      el('chat-log').appendChild(div);
+      el('chat-log').scrollTop = el('chat-log').scrollHeight;
+      return div;
+    }
+    const chatForm = el('chat-form');
+    if (chatForm) {
+      chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = el('chat-input');
+        const q = input.value.trim();
+        if (!q) return;
+        input.value = '';
+        chatBubble('user', q);
+        const thinking = chatBubble('ai', '', 'thinking');
+        thinking.innerHTML = '<span class="spinner"></span>검색 및 답변 생성 중...';
+        el('chat-send').disabled = true;
+        try {
+          const { requestId } = await callJson('/ai/qa', {
+            method: 'POST', body: JSON.stringify({ question: q }),
+          });
+          const done = await pollRequest(requestId, (res) => {
+            thinking.innerHTML = `<span class="spinner"></span>${res.status === 'PROCESSING' ? '답변 생성 중' : '대기 중'}...`;
+          });
+          thinking.classList.remove('thinking');
+          if (done.status === 'COMPLETED') {
+            const meta = `\n\n(토큰 in ${done.inputTokens} · out ${done.outputTokens}${done.cost ? ' · $' + done.cost : ''})`;
+            thinking.textContent = done.output + meta;
+            loadUsage();
+          } else {
+            thinking.textContent = '실패: ' + (done.errorMessage || 'unknown');
+          }
+        } catch (err) {
+          thinking.textContent = String(err.message);
+        } finally {
+          el('chat-send').disabled = false;
+        }
+      });
+    }
+
+    // --- 사용량 ---
+    async function loadUsage() {
       try {
-        await fetch('/session', { method: 'DELETE', credentials: 'same-origin' });
-        show(el, '세션 삭제됨. 새로고침 중...');
-        setTimeout(() => window.location.reload(), 400);
-      } catch (err) { show(el, String(err.message)); }
-    });
+        const u = await callJson('/ai/usage');
+        el('u-count').textContent = u.requestCount;
+        el('u-tokens').textContent = (u.totalInputTokens + u.totalOutputTokens).toLocaleString();
+        el('u-cost').textContent = '$' + u.totalCost.toFixed(4);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    el('usage-btn').addEventListener('click', loadUsage);
 
-    document.getElementById('product-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const el = document.getElementById('product-result');
-      try {
-        const body = await callJson('/products', { method: 'POST', body: JSON.stringify(formData(e.target)) });
-        show(el, body);
-      } catch (err) { show(el, String(err.message)); }
-    });
-
-    document.getElementById('product-list-btn').addEventListener('click', async () => {
-      const el = document.getElementById('product-list');
-      try { show(el, await callJson('/products')); }
-      catch (err) { show(el, String(err.message)); }
-    });
-
-    document.getElementById('copy-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const el = document.getElementById('copy-result');
-      try {
-        const body = await callJson('/ai/copy', { method: 'POST', body: JSON.stringify(formData(e.target)) });
-        show(el, body);
-        document.getElementById('request-id-input').value = body.requestId;
-      } catch (err) { show(el, String(err.message)); }
-    });
-
-    document.getElementById('qa-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const el = document.getElementById('qa-result');
-      try {
-        const raw = formData(e.target);
-        const payload = { question: raw.question };
-        if (raw.topK) payload.topK = Number(raw.topK);
-        const body = await callJson('/ai/qa', { method: 'POST', body: JSON.stringify(payload) });
-        show(el, body);
-        document.getElementById('request-id-input').value = body.requestId;
-      } catch (err) { show(el, String(err.message)); }
-    });
-
-    document.getElementById('request-fetch-btn').addEventListener('click', async () => {
-      const id = document.getElementById('request-id-input').value.trim();
-      const el = document.getElementById('request-result');
-      if (!id) { show(el, 'Request ID를 입력해주세요.'); return; }
-      try { show(el, await callJson('/ai/requests/' + encodeURIComponent(id))); }
-      catch (err) { show(el, String(err.message)); }
-    });
-
-    document.getElementById('usage-btn').addEventListener('click', async () => {
-      const el = document.getElementById('usage-result');
-      try { show(el, await callJson('/ai/usage')); }
-      catch (err) { show(el, String(err.message)); }
-    });
+    // --- 초기 로딩 ---
+    if (hasSession) {
+      loadProducts();
+      loadUsage();
+    }
   </script>
 </body>
 </html>
