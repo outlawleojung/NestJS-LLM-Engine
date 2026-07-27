@@ -9,6 +9,7 @@ import { CryptoModule } from './common/crypto/crypto.module';
 import { RedisModule } from './common/redis/redis.module';
 import { ProductsModule } from './products/products.module';
 import { SessionModule } from './session/session.module';
+import { ViewsModule } from './views/views.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { SessionModule } from './session/session.module';
     SessionModule,
     ProductsModule,
     AiModule,
+    ViewsModule,
   ],
 })
 export class AppModule {}
